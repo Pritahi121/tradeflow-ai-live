@@ -11,6 +11,8 @@ interface AuthContextType {
   loading: boolean
   signIn: (email: string, password: string) => Promise<any>
   signUp: (email: string, password: string, metadata?: any) => Promise<any>
+  signInWithGoogle: () => Promise<any>
+  signInWithTwitter: () => Promise<any>
   signOut: () => Promise<void>
 }
 
@@ -20,6 +22,8 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   signIn: async () => {},
   signUp: async () => {},
+  signInWithGoogle: async () => {},
+  signInWithTwitter: async () => {},
   signOut: async () => {},
 })
 
@@ -152,6 +156,44 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return { data, error }
   }
 
+  const signInWithGoogle = async () => {
+    if (isDevMode) {
+      const result = await devAuth.signInWithGoogle()
+      if (result.data.user) {
+        setUser(result.data.user)
+        setSession(result.data.session)
+      }
+      return result
+    }
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`
+      }
+    })
+    return { data, error }
+  }
+
+  const signInWithTwitter = async () => {
+    if (isDevMode) {
+      const result = await devAuth.signInWithTwitter()
+      if (result.data.user) {
+        setUser(result.data.user)
+        setSession(result.data.session)
+      }
+      return result
+    }
+
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'twitter',
+      options: {
+        redirectTo: `${window.location.origin}/dashboard`
+      }
+    })
+    return { data, error }
+  }
+
   const signOut = async () => {
     if (isDevMode) {
       setUser(null)
@@ -168,6 +210,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     loading,
     signIn,
     signUp,
+    signInWithGoogle,
+    signInWithTwitter,
     signOut,
   }
 

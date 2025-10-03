@@ -90,6 +90,52 @@ export const devAuth = {
     }
   },
 
+  signInWithGoogle: async () => {
+    // Simulate Google OAuth flow
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    
+    const googleUser = {
+      ...mockUser,
+      email: 'user@gmail.com',
+      user_metadata: {
+        ...mockUser.user_metadata,
+        name: 'Google User',
+        avatar_url: 'https://lh3.googleusercontent.com/a-/default-user'
+      }
+    }
+    
+    return { 
+      data: { 
+        user: googleUser, 
+        session: { ...mockSession, user: googleUser } 
+      }, 
+      error: null 
+    }
+  },
+
+  signInWithTwitter: async () => {
+    // Simulate Twitter OAuth flow  
+    await new Promise(resolve => setTimeout(resolve, 1200))
+    
+    const twitterUser = {
+      ...mockUser,
+      email: 'user@twitter.com',
+      user_metadata: {
+        ...mockUser.user_metadata,
+        name: 'Twitter User',
+        avatar_url: 'https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png'
+      }
+    }
+    
+    return { 
+      data: { 
+        user: twitterUser, 
+        session: { ...mockSession, user: twitterUser } 
+      }, 
+      error: null 
+    }
+  },
+
   signUp: async (email: string, password: string, metadata?: any) => {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1500))
