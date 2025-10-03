@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -21,6 +21,30 @@ export default function LoginPage() {
   
   const { signIn, signInWithGoogle, signInWithTwitter } = useAuth()
   const router = useRouter()
+
+  // Check for OAuth callback errors
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const oauthError = urlParams.get('error')
+      
+      if (oauthError) {
+        switch (oauthError) {
+          case 'oauth_callback_failed':
+            setError('OAuth authentication failed. Please try again.')
+            break
+          case 'no_session':
+            setError('Authentication session not found. Please try signing in again.')
+            break
+          case 'callback_error':
+            setError('Authentication callback error. Please try again.')
+            break
+          default:
+            setError('Authentication error occurred. Please try again.')
+        }
+      }
+    }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
