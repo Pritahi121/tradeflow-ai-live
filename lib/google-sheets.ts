@@ -218,32 +218,69 @@ class GoogleSheetsService {
   async testConnection(): Promise<{ success: boolean; message: string }> {
     try {
       const accessToken = await this.getAccessToken()
+      console.log('🔍 Testing Google Sheets connection...')
+      console.log('🔑 Access token available:', !!accessToken)
+      
       if (!accessToken) {
         return {
           success: false,
-          message: 'No Google access token found. Please sign in with Google again.'
+          message: 'No Google access token found. Please sign in with Google again and ensure Google Sheets permission is granted.'
         }
       }
 
-      // Test with a simple API call
-      const response = await fetch('https://www.googleapis.com/drive/v3/about?fields=user', {
+      // Test with Google Sheets API directly instead of Drive API
+      console.log('🧪 Testing Google Sheets API access...')
+      const response = await fetch('https://sheets.googleapis.com/v4/spreadsheets?pageSize=1', {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         }
       })
 
+      console.log('📊 API Response status:', response.status)
+
       if (!response.ok) {
-        throw new Error(`API test failed: ${response.status}`)
+        const errorData = await response.json().catch(() => ({}))
+        console.error('❌ API Error Response:', errorData)
+        
+        if (response.status === 403) {
+          return {
+            success: false,
+            message: 'Google Sheets API access denied. Please check: 1) Google Sheets API is enabled in Google Cloud Console, 2) OAuth consent screen includes Google Sheets scope, 3) Re-login to grant Sheets permission.'
+          }
+        } else if (response.status === 401) {
+          return {
+            success: false,
+            message: 'Authentication failed. Please sign out and sign in again with Google to refresh permissions.'
+          }
+        }
+        
+        throw new Error(`API test failed: ${response.status} - ${errorData.error?.message || 'Unknown error'}`)
       }
 
       const data = await response.json()
+      console.log('✅ Google Sheets API test successful')
+      
+      // Also test basic user info for display
+      const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        }
+      })
+
+      let userEmail = 'Google user'
+      if (userResponse.ok) {
+        const userData = await userResponse.json()
+        userEmail = userData.email || userData.name || 'Google user'
+      }
+
       return {
         success: true,
-        message: `Connected as ${data.user?.emailAddress || 'Google user'}`
+        message: `Connected as ${userEmail}. Google Sheets API access verified.`
       }
     } catch (error) {
-      console.error('Google Sheets connection test failed:', error)
+      console.error('❌ Google Sheets connection test failed:', error)
       return {
         success: false,
         message: `Connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`

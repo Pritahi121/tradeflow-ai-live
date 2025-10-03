@@ -447,6 +447,24 @@ function IntegrationsContent() {
                             )}
                           </Button>
                         )}
+
+                        {/* Re-login Button for 403 Errors */}
+                        {!sheetsConnected && (
+                          <Button 
+                            className="w-full" 
+                            variant="destructive" 
+                            size="sm"
+                            onClick={() => {
+                              // Force logout and redirect to login
+                              signOut()
+                              setTimeout(() => {
+                                window.location.href = '/login'
+                              }, 100)
+                            }}
+                          >
+                            Sign Out & Re-login with Google Sheets Permission
+                          </Button>
+                        )}
                       </div>
                       
                       {/* Instructions */}
@@ -454,6 +472,14 @@ function IntegrationsContent() {
                         <p>• Configure to connect Google Sheets with your account</p>
                         <p>• Test Export creates a sample sheet with mock PO data</p>
                         <p>• Requires Google Sheets API access permissions</p>
+                        {!sheetsConnected && (
+                          <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs">
+                            <p className="font-medium text-yellow-800">Troubleshooting 403 Error:</p>
+                            <p className="text-yellow-700">1. Sign out and sign in again with Google</p>
+                            <p className="text-yellow-700">2. Ensure you grant Google Sheets permission during login</p>
+                            <p className="text-yellow-700">3. Check browser console for detailed error logs</p>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
