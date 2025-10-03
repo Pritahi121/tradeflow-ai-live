@@ -1,9 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key'
+const isDev = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
+// Create Supabase client - in dev mode, this may not connect to a real instance
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+// Development mode check
+export const isDevMode = isDev && (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder'))
 
 // Database Types matching your existing schema
 export interface Client {

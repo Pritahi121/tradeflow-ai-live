@@ -1,358 +1,183 @@
-# 🚀 TradeFlow AI - AI-Powered Purchase Order Processing Platform
+# Supabase CLI
 
-## 📋 Project Overview
+[![Coverage Status](https://coveralls.io/repos/github/supabase/cli/badge.svg?branch=main)](https://coveralls.io/github/supabase/cli?branch=main) [![Bitbucket Pipelines](https://img.shields.io/bitbucket/pipelines/supabase-cli/setup-cli/master?style=flat-square&label=Bitbucket%20Canary)](https://bitbucket.org/supabase-cli/setup-cli/pipelines) [![Gitlab Pipeline Status](https://img.shields.io/gitlab/pipeline-status/sweatybridge%2Fsetup-cli?label=Gitlab%20Canary)
+](https://gitlab.com/sweatybridge/setup-cli/-/pipelines)
 
-TradeFlow AI is a comprehensive SaaS platform that automates purchase order processing using artificial intelligence. The platform extracts, validates, and organizes PO data from various file formats (PDF, EML, TXT) in seconds, helping businesses streamline their procurement workflows.
+[Supabase](https://supabase.io) is an open source Firebase alternative. We're building the features of Firebase using enterprise-grade open source tools.
 
-## 🌟 Key Features
+This repository contains all the functionality for Supabase CLI.
 
-### 🔍 Smart File Processing
-- **Multi-format Support**: PDF, EML, TXT files 📄
-- **AI-powered Extraction**: Automatic data extraction from purchase orders 🤖
-- **Real-time Processing**: Lightning-fast processing with progress tracking ⚡
-- **Validation & Verification**: Intelligent data validation and error detection ✅
+- [x] Running Supabase locally
+- [x] Managing database migrations
+- [x] Creating and deploying Supabase Functions
+- [x] Generating types directly from your database schema
+- [x] Making authenticated HTTP requests to [Management API](https://supabase.com/docs/reference/api/introduction)
 
-### 💳 Credit-based System
-- **Flexible Pricing**: Pay-per-use credit system 💰
-- **Multiple Plans**: Starter (10 credits), Professional (100 credits), Enterprise (500 credits) 📊
-- **Usage Tracking**: Real-time credit consumption monitoring 📈
-- **Auto-renewal**: Automatic credit top-ups available 🔄
+## Getting started
 
-### 🔗 Integrations
-- **Google Sheets**: Direct export to spreadsheets 📊
-- **WhatsApp Business**: Instant notifications 📱
-- **Email Notifications**: Processing status updates 📧
-- **Webhooks**: Custom API endpoints for third-party systems 🔌
-- **API Access**: RESTful API for custom integrations 🛠️
+### Install the CLI
 
-### 📊 Analytics & Reporting
-- **Processing Statistics**: Success rates, processing times 📈
-- **Usage Analytics**: Credit consumption patterns 📉
-- **Performance Metrics**: System efficiency tracking ⚡
-- **Export Reports**: Data export in multiple formats 📋
-
-## 🛠️ Technology Stack
-
-### Frontend 🎨
-- **Next.js 15.5.2** - React framework with App Router ⚛️
-- **TypeScript** - Type-safe development 🔒
-- **Tailwind CSS** - Utility-first CSS framework 🎨
-- **shadcn/ui** - Modern component library 🧩
-- **Framer Motion** - Smooth animations ✨
-- **Lucide React** - Beautiful icons 🎯
-
-### Backend & Database 🗄️
-- **Supabase** - Backend-as-a-Service 🔥
-- **PostgreSQL** - Relational database 🐘
-- **Row Level Security** - Data protection 🛡️
-- **Real-time Subscriptions** - Live updates 📡
-- **Edge Functions** - Serverless computing ⚡
-
-### Authentication & Security 🔐
-- **Supabase Auth** - User authentication 👤
-- **JWT Tokens** - Secure session management 🔑
-- **OAuth Integration** - Google, Twitter login 🌐
-- **Email Verification** - Account security ✉️
-- **Password Recovery** - Self-service password reset 🔄
-
-## 📁 Project Structure
-
-```
-tradeflow-ai/
-├── app/                    # Next.js App Router pages 📱
-│   ├── page.tsx           # Landing page 🏠
-│   ├── login/             # Authentication pages 🔐
-│   ├── signup/
-│   ├── dashboard/         # Main dashboard 📊
-│   ├── upload/            # File upload interface 📤
-│   ├── integrations/      # Third-party integrations 🔗
-│   ├── billing/           # Subscription management 💳
-│   └── settings/          # User preferences ⚙️
-├── components/            # Reusable UI components 🧩
-│   ├── ui/               # shadcn/ui components 🎨
-│   └── ProtectedRoute.tsx # Authentication wrapper 🛡️
-├── contexts/             # React contexts 🔄
-│   └── AuthContext.tsx   # Authentication state 👤
-├── hooks/                # Custom React hooks 🎣
-│   └── useUserData.ts    # Real-time data fetching 📊
-├── lib/                  # Utility libraries 🛠️
-│   └── supabase.ts       # Supabase client 🔥
-├── public/               # Static assets 📁
-└── styles/               # Global styles 🎨
-```
-
-## 🗄️ Database Schema
-
-### Core Tables 📊
-
-#### `clients` 👥
-- User profile information
-- Company details and contact info
-- Client ID generation and management
-
-#### `user_quotas` 💳
-- Credit allocation and tracking
-- Monthly quota management
-- Plan-based credit limits
-
-#### `purchase_orders` 📋
-- PO data storage and processing
-- File metadata and extraction results
-- Processing status tracking
-
-#### `payment_history` 💰
-- Subscription payments
-- Credit purchases
-- Stripe integration data
-
-#### `usage_logs` 📈
-- Credit consumption tracking
-- Action logging and analytics
-- Performance monitoring
-
-#### `pricing_config` 💎
-- Plan definitions and pricing
-- Feature availability matrix
-- Dynamic pricing updates
-
-## 🚀 Getting Started
-
-### Prerequisites 📋
-- Node.js 18+ or Bun 🟢
-- Supabase account 🔥
-- Git 📝
-
-### Installation ⚡
-
-1. **Clone the repository** 📥
-```bash
-git clone <repository-url>
-cd tradeflow-ai
-```
-
-2. **Install dependencies** 📦
-```bash
-bun install
-# or
-npm install
-```
-
-3. **Environment Setup** 🔧
-```bash
-cp .env.example .env.local
-```
-
-4. **Configure Supabase** ⚙️
-```env
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-```
-
-5. **Database Setup** 🗄️
-- Import the provided SQL schema to your Supabase project
-- Enable Row Level Security policies
-- Configure authentication providers
-
-6. **Start Development Server** 🚀
-```bash
-bun run dev
-# or
-npm run dev
-```
-
-## 📊 Current Implementation Status
-
-### ✅ Completed Features (100% Done!) 🎉
-
-#### Frontend (100% Complete) 🎨
-- ✅ **Landing Page**: Professional marketing site with pricing 🏠
-- ✅ **Authentication**: Login/Signup with Supabase integration 🔐
-- ✅ **Dashboard**: User overview with real-time statistics 📊
-- ✅ **Upload Interface**: Drag-and-drop file processing 📤
-- ✅ **Integrations**: API management and third-party connections 🔗
-- ✅ **Billing**: Subscription management and payment history 💳
-- ✅ **Settings**: User preferences and account management ⚙️
-- ✅ **Responsive Design**: Mobile-first approach across all pages 📱
-
-#### Authentication & Security (100% Complete) 🔐
-- ✅ **User Registration**: Account creation with email verification ✉️
-- ✅ **Login System**: Secure authentication with session management 🔑
-- ✅ **Protected Routes**: Dashboard and user pages require authentication 🛡️
-- ✅ **Password Management**: Secure password handling and recovery 🔄
-- ✅ **OAuth Integration**: Google and Twitter login options 🌐
-
-#### Database Integration (100% Complete) 🗄️
-- ✅ **Supabase Connection**: Real database integration 🔥
-- ✅ **User Management**: Profile creation and management 👤
-- ✅ **Credit System**: Usage tracking and quota management 💳
-- ✅ **Data Security**: Row Level Security policies implemented 🛡️
-- ✅ **Real-time Data**: Live dashboard updates from database 📡
-
-### 🔄 In Progress / Mock Implementation
-
-#### File Processing (Frontend Complete, Backend Pending) 📄
-- ✅ **Upload Interface**: Drag-and-drop with progress tracking 📤
-- ✅ **File Validation**: Format and size checking ✅
-- ⏳ **AI Processing**: Currently simulated, needs ML integration 🤖
-- ⏳ **Data Extraction**: Mock extraction results displayed 📊
-
-#### Integrations (UI Complete, API Pending) 🔗
-- ✅ **Integration Management**: UI for managing connections 🔧
-- ✅ **API Key Generation**: Frontend interface complete 🔑
-- ⏳ **Google Sheets**: Connection UI ready, API integration pending 📊
-- ⏳ **WhatsApp Business**: Setup interface complete 📱
-- ⏳ **Webhooks**: Configuration UI ready 🔌
-
-#### Payment System (UI Complete, Stripe Pending) 💳
-- ✅ **Billing Interface**: Subscription management UI 💰
-- ✅ **Usage Tracking**: Credit consumption display 📈
-- ⏳ **Stripe Integration**: Payment processing pending 💳
-- ⏳ **Invoice Generation**: Automated billing pending 📋
-
-### 🎯 Next Development Phases
-
-#### Phase 1: Core Processing Engine 🤖
-- **AI/ML Integration**: Implement actual document processing 🧠
-- **File Storage**: Supabase Storage for uploaded documents 📁
-- **Processing Queue**: Background job processing ⚡
-- **Error Handling**: Comprehensive error management 🛠️
-
-#### Phase 2: Payment & Billing 💰
-- **Stripe Integration**: Complete payment processing 💳
-- **Subscription Management**: Automated billing cycles 🔄
-- **Invoice Generation**: PDF invoice creation 📋
-- **Tax Calculation**: Regional tax compliance 📊
-
-#### Phase 3: Advanced Integrations 🔗
-- **Google Sheets API**: Real spreadsheet integration 📊
-- **WhatsApp Business API**: Automated notifications 📱
-- **Email Service**: Transactional email system 📧
-- **Webhook System**: Custom endpoint notifications 🔌
-
-#### Phase 4: Analytics & Reporting 📈
-- **Advanced Analytics**: Processing insights and trends 📊
-- **Custom Reports**: User-defined reporting 📋
-- **Data Export**: Multiple format support 📤
-- **Performance Monitoring**: System health tracking ⚡
-
-## 🔧 Development Commands
+Available via [NPM](https://www.npmjs.com) as dev dependency. To install:
 
 ```bash
-# Development 🚀
-bun run dev          # Start development server
-bun run build        # Build for production
-bun run start        # Start production server
-bun run lint         # Run ESLint
-bun run type-check   # TypeScript checking
-
-# Database 🗄️
-bun run db:generate  # Generate database types
-bun run db:push      # Push schema changes
-bun run db:reset     # Reset database
+npm i supabase --save-dev
 ```
 
-## 🌐 Deployment
+To install the beta release channel:
 
-### Vercel (Recommended) ⚡
-1. Connect GitHub repository to Vercel 🔗
-2. Configure environment variables ⚙️
-3. Deploy automatically on push 🚀
+```bash
+npm i supabase@beta --save-dev
+```
 
-### Manual Deployment 🛠️
-1. Build the application: `bun run build` 📦
-2. Deploy to your hosting provider 🌐
-3. Configure environment variables ⚙️
-4. Set up domain and SSL 🔒
+When installing with yarn 4, you need to disable experimental fetch with the following nodejs config.
 
-## 📈 Performance & Scalability
+```
+NODE_OPTIONS=--no-experimental-fetch yarn add supabase
+```
 
-### Current Metrics ⚡
-- **Page Load Time**: < 2 seconds ⚡
-- **File Upload**: Up to 10MB per file 📤
-- **Concurrent Users**: Designed for 1000+ users 👥
-- **Database**: Optimized queries with indexing 🗄️
+> **Note**
+For Bun versions below v1.0.17, you must add `supabase` as a [trusted dependency](https://bun.sh/guides/install/trusted) before running `bun add -D supabase`.
 
-### Scalability Features 🚀
-- **Edge Functions**: Serverless processing ⚡
-- **CDN Integration**: Global content delivery 🌐
-- **Database Optimization**: Efficient queries and indexing 📊
-- **Caching Strategy**: Redis-ready architecture 🔄
+<details>
+  <summary><b>macOS</b></summary>
 
-## 🔒 Security Features
+  Available via [Homebrew](https://brew.sh). To install:
 
-- **Row Level Security**: Database-level access control 🛡️
-- **JWT Authentication**: Secure token-based auth 🔑
-- **Input Validation**: Comprehensive data validation ✅
-- **Rate Limiting**: API abuse prevention 🚫
-- **HTTPS Enforcement**: Secure data transmission 🔒
-- **Environment Variables**: Secure configuration management ⚙️
+  ```sh
+  brew install supabase/tap/supabase
+  ```
 
-## 📞 Support & Documentation
+  To install the beta release channel:
+  
+  ```sh
+  brew install supabase/tap/supabase-beta
+  brew link --overwrite supabase-beta
+  ```
+  
+  To upgrade:
 
-### API Documentation 📋
-- **REST API**: Complete endpoint documentation 🔗
-- **Authentication**: API key and JWT usage 🔑
-- **Rate Limits**: Usage guidelines and limits ⚡
-- **Error Codes**: Comprehensive error handling 🛠️
+  ```sh
+  brew upgrade supabase
+  ```
+</details>
 
-### User Guides 📖
-- **Getting Started**: Step-by-step onboarding 🚀
-- **File Processing**: Upload and processing guide 📤
-- **Integrations**: Third-party connection setup 🔗
-- **Billing**: Subscription and payment management 💳
+<details>
+  <summary><b>Windows</b></summary>
 
-## 🤝 Contributing
+  Available via [Scoop](https://scoop.sh). To install:
 
-1. Fork the repository 🍴
-2. Create a feature branch 🌿
-3. Make your changes ✏️
-4. Add tests if applicable 🧪
-5. Submit a pull request 📤
+  ```powershell
+  scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
+  scoop install supabase
+  ```
 
-## 📄 License
+  To upgrade:
 
-This project is licensed under the MIT License - see the LICENSE file for details. 📜
+  ```powershell
+  scoop update supabase
+  ```
+</details>
 
-## 🎯 Roadmap
+<details>
+  <summary><b>Linux</b></summary>
 
-### Q1 2024 🗓️
-- [ ] Complete AI processing engine 🤖
-- [ ] Stripe payment integration 💳
-- [ ] Google Sheets API integration 📊
-- [ ] Mobile app development 📱
+  Available via [Homebrew](https://brew.sh) and Linux packages.
 
-### Q2 2024 🗓️
-- [ ] Advanced analytics dashboard 📈
-- [ ] Multi-language support 🌍
-- [ ] Enterprise features 🏢
-- [ ] API marketplace 🛒
+  #### via Homebrew
 
-### Q3 2024 🗓️
-- [ ] Machine learning improvements 🧠
-- [ ] Custom workflow builder 🔧
-- [ ] Advanced reporting 📊
-- [ ] White-label solutions 🏷️
+  To install:
 
----
+  ```sh
+  brew install supabase/tap/supabase
+  ```
 
-**Built with ❤️ for modern businesses** 🚀
+  To upgrade:
 
-**🌟 Live Demo**: https://hungry-waves-smoke.lindy.site
-**👤 Test Account**: test@tradeflow.ai / TestPassword123!
+  ```sh
+  brew upgrade supabase
+  ```
 
-For questions or support, please contact: support@tradeflow.ai 📧
+  #### via Linux packages
 
----
+  Linux packages are provided in [Releases](https://github.com/supabase/cli/releases). To install, download the `.apk`/`.deb`/`.rpm`/`.pkg.tar.zst` file depending on your package manager and run the respective commands.
 
-## 🎉 Recent Updates (Latest Commit)
+  ```sh
+  sudo apk add --allow-untrusted <...>.apk
+  ```
 
-### ✅ Real Database Integration Complete! 🔥
-- **Dashboard**: Now shows real data from Supabase instead of mock data 📊
-- **Credits**: 8/10 remaining (2 used) - Real usage tracking 💳
-- **Purchase Orders**: 24 processed with 96% success rate 📈
-- **Integrations**: 2 active (Google Sheets, Email) 🔗
-- **Loading States**: Professional skeleton components added ⚡
-- **Error Handling**: Comprehensive error management 🛠️
+  ```sh
+  sudo dpkg -i <...>.deb
+  ```
 
-**🎯 Status**: Production Ready! ✅
+  ```sh
+  sudo rpm -i <...>.rpm
+  ```
+
+  ```sh
+  sudo pacman -U <...>.pkg.tar.zst
+  ```
+</details>
+
+<details>
+  <summary><b>Other Platforms</b></summary>
+
+  You can also install the CLI via [go modules](https://go.dev/ref/mod#go-install) without the help of package managers.
+
+  ```sh
+  go install github.com/supabase/cli@latest
+  ```
+
+  Add a symlink to the binary in `$PATH` for easier access:
+
+  ```sh
+  ln -s "$(go env GOPATH)/bin/cli" /usr/bin/supabase
+  ```
+
+  This works on other non-standard Linux distros.
+</details>
+
+<details>
+  <summary><b>Community Maintained Packages</b></summary>
+
+  Available via [pkgx](https://pkgx.sh/). Package script [here](https://github.com/pkgxdev/pantry/blob/main/projects/supabase.com/cli/package.yml).
+  To install in your working directory:
+
+  ```bash
+  pkgx install supabase
+  ```
+
+  Available via [Nixpkgs](https://nixos.org/). Package script [here](https://github.com/NixOS/nixpkgs/blob/master/pkgs/development/tools/supabase-cli/default.nix).
+</details>
+
+### Run the CLI
+
+```bash
+supabase bootstrap
+```
+
+Or using npx:
+
+```bash
+npx supabase bootstrap
+```
+
+The bootstrap command will guide you through the process of setting up a Supabase project using one of the [starter](https://github.com/supabase-community/supabase-samples/blob/main/samples.json) templates.
+
+## Docs
+
+Command & config reference can be found [here](https://supabase.com/docs/reference/cli/about).
+
+## Breaking changes
+
+We follow semantic versioning for changes that directly impact CLI commands, flags, and configurations.
+
+However, due to dependencies on other service images, we cannot guarantee that schema migrations, seed.sql, and generated types will always work for the same CLI major version. If you need such guarantees, we encourage you to pin a specific version of CLI in package.json.
+
+## Developing
+
+To run from source:
+
+```sh
+# Go >= 1.22
+go run . help
+```

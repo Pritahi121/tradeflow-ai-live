@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { supabase } from '@/lib/supabase'
+import { supabase, isDevMode } from '@/lib/supabase'
+import { mockDashboardData } from '@/lib/dev-auth'
 
 interface UserQuota {
   id: string
@@ -57,6 +58,57 @@ export const useUserData = () => {
     try {
       setLoading(true)
 
+      if (isDevMode) {
+        // Use mock data in development mode
+        console.log('📊 Using mock dashboard data for development')
+        await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate loading
+        
+        setUserStats({
+          totalCredits: mockDashboardData.credits.total,
+          usedCredits: mockDashboardData.credits.used,
+          remainingCredits: mockDashboardData.credits.remaining,
+          totalPOs: mockDashboardData.purchaseOrders.total,
+          successRate: mockDashboardData.purchaseOrders.success_rate,
+          activeIntegrations: mockDashboardData.integrations.active
+        })
+
+        // Create mock recent POs
+        const mockRecentPOs: PurchaseOrder[] = [
+          {
+            id: '1',
+            user_id: user.id,
+            po_number: 'PO-2024-001',
+            vendor_name: 'Acme Corp',
+            total_amount: 1250.00,
+            status: 'completed',
+            created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            id: '2',
+            user_id: user.id,
+            po_number: 'PO-2024-002',
+            vendor_name: 'Tech Solutions Inc',
+            total_amount: 850.50,
+            status: 'completed',
+            created_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            id: '3',
+            user_id: user.id,
+            po_number: 'PO-2024-003',
+            vendor_name: 'Office Supplies Ltd',
+            total_amount: 325.75,
+            status: 'processing',
+            created_at: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString()
+          }
+        ]
+
+        setRecentPOs(mockRecentPOs)
+        setLoading(false)
+        return
+      }
+
+      // Production mode - fetch from Supabase
       // Fetch user quota
       const { data: quotaData, error: quotaError } = await supabase
         .from('user_quotas')

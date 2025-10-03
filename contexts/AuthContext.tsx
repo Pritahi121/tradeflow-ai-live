@@ -2,7 +2,8 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 import { User, Session } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'
+import { supabase, isDevMode } from '@/lib/supabase'
+import { devAuth, mockUser, mockSession } from '@/lib/dev-auth'
 
 interface AuthContextType {
   user: User | null
@@ -36,31 +37,46 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Get initial session
     const getInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      setSession(session)
-      setUser(session?.user ?? null)
-      setLoading(false)
+      if (isDevMode) {
+        // In development mode, use mock data
+        console.log('🚀 Running in development mode - using mock authentication')
+        setSession(mockSession)
+        setUser(mockUser)
+        setLoading(false)
+        return
+      }
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession()
+        setSession(session)
+        setUser(session?.user ?? null)
+        setLoading(false)
+      } catch (error) {
+        console.error('Auth session error:', error)
+        setLoading(false)
+      }
     }
 
     getInitialSession()
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        setSession(session)
-        setUser(session?.user ?? null)
-        setLoading(false)
+    if (!isDevMode) {
+      // Listen for auth changes only in production mode
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        async (event, session) => {
+          setSession(session)
+          setUser(session?.user ?? null)
+          setLoading(false)
 
-        // Handle new user signup
-        if (event === 'SIGNED_UP' && session?.user) {
-          await handleNewUser(session.user)
+          // Handle new user signup
+          if (event === 'SIGNED_UP' && session?.user) {
+            await handleNewUser(session.user)
+          }
         }
-      }
-    )
+      )
 
-    return () => subscription.unsubscribe()
+      return () => subscription.unsubscribe()
+    }
   }, [])
 
   const handleNewUser = async (user: User) => {
@@ -100,6 +116,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   const signIn = async (email: string, password: string) => {
+    if (isDevMode) {
+      const result = await devAuth.signIn(email, password)
+      if (result.data.user) {
+        setUser(result.data.user)
+        setSession(result.data.session)
+      }
+      return result
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -108,6 +133,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   const signUp = async (email: string, password: string, metadata?: any) => {
+    if (isDevMode) {
+      const result = await devAuth.signUp(email, password, metadata)
+      if (result.data.user) {
+        setUser(result.data.user)
+        setSession(result.data.session)
+      }
+      return result
+    }
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -119,6 +153,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   const signOut = async () => {
+    if (isDevMode) {
+      setUser(null)
+      setSession(null)
+      return
+    }
+    
     await supabase.auth.signOut()
   }
 
