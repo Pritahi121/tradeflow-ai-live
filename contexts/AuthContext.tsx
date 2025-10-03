@@ -166,14 +166,42 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       return result
     }
 
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-        scopes: 'openid email profile https://www.googleapis.com/auth/spreadsheets'
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+          scopes: 'openid email profile https://www.googleapis.com/auth/spreadsheets',
+          // Additional options for better OAuth handling
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent'
+          }
+        }
+      })
+      
+      if (error) {
+        console.error('Google OAuth Error:', error)
+        // Fallback to basic scopes if Google Sheets scope fails
+        const fallbackResult = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: `${window.location.origin}/auth/callback`,
+            scopes: 'openid email profile',
+            queryParams: {
+              access_type: 'offline',
+              prompt: 'consent'
+            }
+          }
+        })
+        return fallbackResult
       }
-    })
-    return { data, error }
+      
+      return { data, error }
+    } catch (err) {
+      console.error('OAuth Error:', err)
+      return { data: null, error: err }
+    }
   }
 
   const signInWithTwitter = async () => {
