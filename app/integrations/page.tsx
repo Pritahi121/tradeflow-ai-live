@@ -19,13 +19,21 @@ import {
 import Link from 'next/link'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import { useAuth } from '@/contexts/AuthContext'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { googleSheetsService, mockGoogleSheets } from '@/lib/google-sheets'
+import { isDevMode } from '@/lib/supabase'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Loader2 } from 'lucide-react'
 
 function IntegrationsContent() {
   const { user, signOut } = useAuth()
   const [emailEnabled, setEmailEnabled] = useState(true)
   const [sheetsEnabled, setSheetsEnabled] = useState(false)
   const [notificationEmail, setNotificationEmail] = useState(user?.email || '')
+  const [sheetsConfiguring, setSheetsConfiguring] = useState(false)
+  const [sheetsConnected, setSheetsConnected] = useState(false)
+  const [sheetsConnectionMessage, setSheetsConnectionMessage] = useState('')
+  const [sheetsAlert, setSheetsAlert] = useState<{ type: 'success' | 'error', message: string } | null>(null)
 
   const integrations = [
     {
@@ -55,6 +63,140 @@ function IntegrationsContent() {
       setEmailEnabled(enabled)
     } else if (id === 'sheets') {
       setSheetsEnabled(enabled)
+    }
+  }
+
+  // Test Google Sheets connection on component mount
+  useEffect(() => {
+    const testSheetsConnection = async () => {
+      if (isDevMode) {
+        // Mock connection test in development
+        const result = await mockGoogleSheets.testConnection()
+        setSheetsConnected(result.success)
+        setSheetsConnectionMessage(result.message)
+      } else {
+        // Real Google Sheets connection test
+        const result = await googleSheetsService.testConnection()
+        setSheetsConnected(result.success)
+        setSheetsConnectionMessage(result.message)
+      }
+    }
+
+    testSheetsConnection()
+  }, [])
+
+  const handleConfigureGoogleSheets = async () => {
+    setSheetsConfiguring(true)
+    setSheetsAlert(null)
+    
+    try {
+      // Test connection first
+      let connectionResult
+      if (isDevMode) {
+        connectionResult = await mockGoogleSheets.testConnection()
+      } else {
+        connectionResult = await googleSheetsService.testConnection()
+      }
+
+      if (!connectionResult.success) {
+        setSheetsAlert({
+          type: 'error',
+          message: connectionResult.message
+        })
+        return
+      }
+
+      // Try to create a test sheet or get user sheets
+      let sheetsResult
+      if (isDevMode) {
+        sheetsResult = await mockGoogleSheets.createPOSheet('TradeFlow AI - PO Export')
+        if (sheetsResult) {
+          setSheetsAlert({
+            type: 'success',
+            message: `Successfully configured! Mock sheet created with ID: ${sheetsResult}`
+          })
+          setSheetsEnabled(true)
+        }
+      } else {
+        // In production, try to get user sheets to verify API access
+        const userSheets = await googleSheetsService.getUserSheets()
+        if (userSheets) {
+          setSheetsAlert({
+            type: 'success',
+            message: `Google Sheets connected successfully! Found ${userSheets.length} sheets in your account.`
+          })
+          setSheetsEnabled(true)
+        } else {
+          throw new Error('Failed to access Google Sheets API')
+        }
+      }
+
+      setSheetsConnected(true)
+      
+    } catch (error) {
+      console.error('Google Sheets configuration error:', error)
+      setSheetsAlert({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Failed to configure Google Sheets'
+      })
+    } finally {
+      setSheetsConfiguring(false)
+    }
+  }
+
+  const handleTestGoogleSheetsExport = async () => {
+    setSheetsConfiguring(true)
+    setSheetsAlert(null)
+    
+    try {
+      // Mock PO data for testing
+      const mockPOData = [
+        {
+          id: '1',
+          po_number: 'PO-2024-001',
+          vendor_name: 'Test Vendor',
+          total_amount: 1250.50,
+          items: [{ name: 'Test Item', quantity: 5 }],
+          status: 'Completed',
+          created_at: new Date().toISOString(),
+          processed_at: new Date().toISOString()
+        }
+      ]
+
+      if (isDevMode) {
+        const success = await mockGoogleSheets.exportPOData('mock-sheet-id', mockPOData)
+        if (success) {
+          setSheetsAlert({
+            type: 'success',
+            message: 'Test export successful! Mock data exported to Google Sheets.'
+          })
+        }
+      } else {
+        // Create a test sheet and export data
+        const sheetId = await googleSheetsService.createPOSheet('TradeFlow AI - Test Export')
+        if (sheetId) {
+          const success = await googleSheetsService.exportPOData(sheetId, mockPOData)
+          if (success) {
+            setSheetsAlert({
+              type: 'success',
+              message: `Test export successful! Created sheet and exported test data. Sheet ID: ${sheetId}`
+            })
+          } else {
+            throw new Error('Export test failed')
+          }
+        } else {
+          throw new Error('Failed to create test sheet')
+        }
+      }
+      
+    } catch (error) {
+      console.error('Google Sheets export test error:', error)
+      setSheetsAlert({
+        type: 'error',
+        message: error instanceof Error ? error.message : 'Export test failed'
+      })
+    } finally {
+      setSheetsConfiguring(false)
     }
   }
 
@@ -224,12 +366,95 @@ function IntegrationsContent() {
                     </div>
                   )}
 
-                  {integration.enabled && !integration.setup && (
-                    <div className="pt-4 border-t">
-                      <Button className="w-full" variant="outline">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        Configure {integration.name}
-                      </Button>
+                  {integration.enabled && !integration.setup && integration.id === 'sheets' && (
+                    <div className="pt-4 border-t space-y-4">
+                      {/* Connection Status */}
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center space-x-2">
+                          {sheetsConnected ? (
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <AlertCircle className="h-4 w-4 text-yellow-600" />
+                          )}
+                          <span className="text-sm font-medium">
+                            {sheetsConnected ? 'Connected' : 'Not Connected'}
+                          </span>
+                        </div>
+                        <Badge variant={sheetsConnected ? 'default' : 'secondary'}>
+                          {sheetsConnected ? 'Ready' : 'Setup Required'}
+                        </Badge>
+                      </div>
+
+                      {sheetsConnectionMessage && (
+                        <p className="text-xs text-gray-600 px-3">
+                          {sheetsConnectionMessage}
+                        </p>
+                      )}
+
+                      {/* Alerts */}
+                      {sheetsAlert && (
+                        <Alert className={sheetsAlert.type === 'success' ? 'border-green-200' : 'border-red-200'}>
+                          {sheetsAlert.type === 'success' ? (
+                            <CheckCircle className="h-4 w-4" />
+                          ) : (
+                            <AlertCircle className="h-4 w-4" />
+                          )}
+                          <AlertDescription className={sheetsAlert.type === 'success' ? 'text-green-800' : 'text-red-800'}>
+                            {sheetsAlert.message}
+                          </AlertDescription>
+                        </Alert>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div className="space-y-2">
+                        <Button 
+                          className="w-full" 
+                          variant="outline"
+                          onClick={handleConfigureGoogleSheets}
+                          disabled={sheetsConfiguring}
+                        >
+                          {sheetsConfiguring ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Configuring...
+                            </>
+                          ) : (
+                            <>
+                              <ExternalLink className="h-4 w-4 mr-2" />
+                              Configure Google Sheets
+                            </>
+                          )}
+                        </Button>
+
+                        {sheetsConnected && (
+                          <Button 
+                            className="w-full" 
+                            variant="secondary" 
+                            size="sm"
+                            onClick={handleTestGoogleSheetsExport}
+                            disabled={sheetsConfiguring}
+                          >
+                            {sheetsConfiguring ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Testing...
+                              </>
+                            ) : (
+                              <>
+                                <FileSpreadsheet className="h-4 w-4 mr-2" />
+                                Test Export
+                              </>
+                            )}
+                          </Button>
+                        )}
+                      </div>
+                      
+                      {/* Instructions */}
+                      <div className="text-xs text-gray-500 space-y-1">
+                        <p>• Configure to connect Google Sheets with your account</p>
+                        <p>• Test Export creates a sample sheet with mock PO data</p>
+                        <p>• Requires Google Sheets API access permissions</p>
+                      </div>
                     </div>
                   )}
                 </div>
