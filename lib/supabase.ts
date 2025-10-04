@@ -4,6 +4,11 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key'
 const isDev = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
 
+// Create Supabase client function for API routes
+export function createSupabaseClient() {
+  return createClient(supabaseUrl, supabaseAnonKey)
+}
+
 // Create Supabase client - in dev mode, this may not connect to a real instance
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 

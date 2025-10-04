@@ -91,23 +91,40 @@ export const devAuth = {
   },
 
   signInWithGoogle: async () => {
-    // Simulate Google OAuth flow
+    // Simulate Google OAuth flow with better UX
     await new Promise(resolve => setTimeout(resolve, 1500))
     
+    // In development mode, we'll show a mock OAuth consent screen
+    // For now, simulate successful Google OAuth with proper user data
     const googleUser = {
       ...mockUser,
+      id: 'google-user-123',
       email: 'user@gmail.com',
       user_metadata: {
         ...mockUser.user_metadata,
         name: 'Google User',
-        avatar_url: 'https://lh3.googleusercontent.com/a-/default-user'
+        avatar_url: 'https://lh3.googleusercontent.com/a-/default-user',
+        provider: 'google',
+        full_name: 'Google User'
+      },
+      app_metadata: {
+        ...mockUser.app_metadata,
+        provider: 'google',
+        providers: ['google']
       }
+    }
+    
+    const googleSession = {
+      ...mockSession,
+      access_token: 'google-access-token-123',
+      refresh_token: 'google-refresh-token-123',
+      user: googleUser
     }
     
     return { 
       data: { 
         user: googleUser, 
-        session: { ...mockSession, user: googleUser } 
+        session: googleSession 
       }, 
       error: null 
     }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
@@ -19,12 +19,15 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useDropzone } from 'react-dropzone'
+import { uploadPOFile, pollPOUploadStatus, type POUpload } from '@/lib/api'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface UploadedFile {
   file: File
   id: string
   status: 'uploading' | 'processing' | 'completed' | 'failed'
   progress: number
+  uploadId?: string
   result?: {
     po_number: string
     vendor_name: string
@@ -35,8 +38,10 @@ interface UploadedFile {
 }
 
 export default function UploadPage() {
+  const { user } = useAuth()
   const [files, setFiles] = useState<UploadedFile[]>([])
-  const [credits, setCredits] = useState(8) // Mock credits
+  const [credits, setCredits] = useState(8) // This should come from API
+  const [isUploading, setIsUploading] = useState(false)
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const newFiles = acceptedFiles.map(file => ({
@@ -48,11 +53,79 @@ export default function UploadPage() {
 
     setFiles(prev => [...prev, ...newFiles])
 
-    // Simulate file processing
+    // Process each file
     newFiles.forEach(uploadedFile => {
-      simulateProcessing(uploadedFile.id)
+      processFileUpload(uploadedFile)
     })
   }, [])
+
+  const processFileUpload = async (uploadedFile: UploadedFile) => {
+    try {
+      setIsUploading(true)
+      
+      // Upload file to Supabase
+      const result = await uploadPOFile(uploadedFile.file)
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Upload failed')
+      }
+
+      // Update file with upload ID
+      setFiles(prev => prev.map(f => 
+        f.id === uploadedFile.id 
+          ? { ...f, uploadId: result.upload!.id, progress: 100, status: 'processing' }
+          : f
+      ))
+
+      // Start polling for status
+      if (result.upload) {
+        pollPOUploadStatus(
+          result.upload.id,
+          (upload) => {
+            setFiles(prev => prev.map(f => 
+              f.uploadId === upload.id ? {
+                ...f,
+                status: upload.status,
+                progress: upload.status === 'processing' ? 75 : upload.status === 'completed' ? 100 : 50,
+                error: upload.error_message,
+                result: upload.extracted_data ? {
+                  po_number: upload.extracted_data.po_number || 'N/A',
+                  vendor_name: upload.extracted_data.vendor_name || 'N/A',
+                  total_amount: upload.extracted_data.total_amount || 0,
+                  line_items: upload.extracted_data.line_items || 0
+                } : undefined
+              } : f
+            ))
+          },
+          (upload) => {
+            // Processing complete
+            if (upload.status === 'completed') {
+              setCredits(prev => Math.max(0, prev - 1))
+            }
+          },
+          (error) => {
+            setFiles(prev => prev.map(f => 
+              f.id === uploadedFile.id ? { ...f, status: 'failed', error } : f
+            ))
+          }
+        )
+      }
+
+    } catch (error) {
+      console.error('File upload error:', error)
+      setFiles(prev => prev.map(f => 
+        f.id === uploadedFile.id 
+          ? { 
+              ...f, 
+              status: 'failed', 
+              error: error instanceof Error ? error.message : 'Upload failed'
+            } 
+          : f
+      ))
+    } finally {
+      setIsUploading(false)
+    }
+  }
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -63,59 +136,6 @@ export default function UploadPage() {
     },
     maxSize: 10 * 1024 * 1024, // 10MB
   })
-
-  const simulateProcessing = (fileId: string) => {
-    // Simulate upload progress
-    let progress = 0
-    const uploadInterval = setInterval(() => {
-      progress += 10
-      setFiles(prev => prev.map(f => 
-        f.id === fileId ? { ...f, progress } : f
-      ))
-
-      if (progress >= 100) {
-        clearInterval(uploadInterval)
-        
-        // Start processing
-        setFiles(prev => prev.map(f => 
-          f.id === fileId ? { ...f, status: 'processing', progress: 0 } : f
-        ))
-
-        // Simulate processing
-        let processProgress = 0
-        const processInterval = setInterval(() => {
-          processProgress += 15
-          setFiles(prev => prev.map(f => 
-            f.id === fileId ? { ...f, progress: processProgress } : f
-          ))
-
-          if (processProgress >= 100) {
-            clearInterval(processInterval)
-            
-            // Simulate completion with mock data
-            const mockResult = {
-              po_number: `PO-2024-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
-              vendor_name: ['Tech Solutions Ltd', 'Office Supplies Co', 'Manufacturing Inc'][Math.floor(Math.random() * 3)],
-              total_amount: Math.floor(Math.random() * 100000) + 5000,
-              line_items: Math.floor(Math.random() * 10) + 1
-            }
-
-            setFiles(prev => prev.map(f => 
-              f.id === fileId ? { 
-                ...f, 
-                status: 'completed', 
-                progress: 100,
-                result: mockResult
-              } : f
-            ))
-
-            // Deduct credit
-            setCredits(prev => Math.max(0, prev - 1))
-          }
-        }, 500)
-      }
-    }, 200)
-  }
 
   const removeFile = (fileId: string) => {
     setFiles(prev => prev.filter(f => f.id !== fileId))
@@ -227,14 +247,17 @@ export default function UploadPage() {
                   : 'border-gray-300 hover:border-gray-400'
               }`}
             >
-              <input {...getInputProps()} />
+              <input {...getInputProps()} disabled={isUploading} />
               <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
               {isDragActive ? (
                 <p className="text-lg text-blue-600">Drop the files here...</p>
               ) : (
                 <>
                   <p className="text-lg text-gray-600 mb-2">
-                    Drag & drop files here, or <span className="text-blue-600 font-medium">browse</span>
+                    {isUploading ? 'Uploading files...' : 'Drag & drop files here, or'}{' '}
+                    <span className="text-blue-600 font-medium">
+                      {isUploading ? 'please wait' : 'browse'}
+                    </span>
                   </p>
                   <p className="text-sm text-gray-500">
                     PDF, EML, TXT files up to 10MB each
@@ -297,7 +320,7 @@ export default function UploadPage() {
                       <div className="mb-3">
                         <div className="flex justify-between text-sm text-gray-600 mb-1">
                           <span>
-                            {uploadedFile.status === 'uploading' ? 'Uploading...' : 'Processing with AI...'}
+                            {uploadedFile.status === 'uploading' ? 'Uploading to cloud...' : 'Processing with AI...'}
                           </span>
                           <span>{uploadedFile.progress}%</span>
                         </div>
@@ -367,6 +390,7 @@ export default function UploadPage() {
                   <li>• Each file costs 1 processing credit</li>
                   <li>• Processing typically takes 30-60 seconds</li>
                   <li>• Results are automatically saved to your dashboard</li>
+                  <li>• Files are stored securely in cloud storage</li>
                 </ul>
               </div>
             </div>

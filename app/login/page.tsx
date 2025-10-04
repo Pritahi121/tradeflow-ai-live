@@ -76,7 +76,12 @@ export default function LoginPage() {
       if (error) {
         setError(error.message)
       } else if (data.user) {
-        router.push('/dashboard')
+        // In development mode, redirect directly since no real OAuth flow
+        if (process.env.NEXT_PUBLIC_DEV_MODE === 'true') {
+          router.push('/auth/callback')
+        } else {
+          router.push('/dashboard')
+        }
       }
     } catch (err) {
       setError('Google sign-in failed. Please try again.')
@@ -95,7 +100,12 @@ export default function LoginPage() {
       if (error) {
         setError(error.message)
       } else if (data.user) {
-        router.push('/dashboard')
+        // In development mode, redirect directly since no real OAuth flow
+        if (process.env.NEXT_PUBLIC_DEV_MODE === 'true') {
+          router.push('/auth/callback')
+        } else {
+          router.push('/dashboard')
+        }
       }
     } catch (err) {
       setError('Twitter sign-in failed. Please try again.')
@@ -117,6 +127,21 @@ export default function LoginPage() {
           </div>
           <p className="text-gray-600">Welcome back! Sign in to your account</p>
         </div>
+
+        {/* Development Mode Indicator */}
+        {process.env.NEXT_PUBLIC_DEV_MODE === 'true' && (
+          <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+              <p className="text-sm text-amber-800">
+                <strong>Development Mode:</strong> Using mock authentication
+              </p>
+            </div>
+            <p className="text-xs text-amber-600 mt-1">
+              Google/Twitter sign-in will simulate authentication
+            </p>
+          </div>
+        )}
 
         <Card className="shadow-lg border-0">
           <CardHeader className="space-y-1 pb-6">

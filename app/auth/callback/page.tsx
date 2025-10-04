@@ -13,7 +13,9 @@ export default function AuthCallback() {
       // In development mode, redirect immediately to dashboard
       if (isDevMode) {
         console.log('🔄 Development mode - redirecting to dashboard')
-        router.push('/dashboard')
+        setTimeout(() => {
+          router.push('/dashboard')
+        }, 1000) // Small delay to show the loading state
         return
       }
 
@@ -23,8 +25,11 @@ export default function AuthCallback() {
         
         if (error) {
           console.error('OAuth callback error:', error)
-          // Redirect to login with error
-          router.push('/login?error=oauth_callback_failed')
+          // Redirect to login with specific error
+          const errorMessage = error.message.includes('access_denied') 
+            ? 'oauth_callback_failed' 
+            : 'callback_error'
+          router.push(`/login?error=${errorMessage}`)
           return
         }
 
@@ -52,10 +57,20 @@ export default function AuthCallback() {
         <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Completing Sign In</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          {isDevMode ? 'Development Mode Sign In' : 'Completing Sign In'}
+        </h2>
         <p className="text-gray-600">
-          Please wait while we process your authentication...
+          {isDevMode 
+            ? 'Signing you in with mock credentials...'
+            : 'Please wait while we process your authentication...'
+          }
         </p>
+        {isDevMode && (
+          <p className="text-sm text-gray-500 mt-2">
+            This is a simulated authentication for development purposes.
+          </p>
+        )}
       </div>
     </div>
   )

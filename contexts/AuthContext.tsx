@@ -158,6 +158,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signInWithGoogle = async () => {
     if (isDevMode) {
+      console.log('🔧 Development mode - using mock Google authentication')
       const result = await devAuth.signInWithGoogle()
       if (result.data.user) {
         setUser(result.data.user)
@@ -206,6 +207,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signInWithTwitter = async () => {
     if (isDevMode) {
+      console.log('🔧 Development mode - using mock Twitter authentication')
       const result = await devAuth.signInWithTwitter()
       if (result.data.user) {
         setUser(result.data.user)

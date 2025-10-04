@@ -24,6 +24,7 @@ import { googleSheetsService, mockGoogleSheets } from '@/lib/google-sheets'
 import { isDevMode } from '@/lib/supabase'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2 } from 'lucide-react'
+import { initiateGoogleOAuth, getIntegrationTokens, saveIntegrationToken } from '@/lib/api'
 
 function IntegrationsContent() {
   const { user, signOut } = useAuth()
@@ -90,49 +91,27 @@ function IntegrationsContent() {
     setSheetsAlert(null)
     
     try {
-      // Test connection first
-      let connectionResult
+      // Check if we're in development mode
       if (isDevMode) {
-        connectionResult = await mockGoogleSheets.testConnection()
+        // Mock configuration in development
+        const result = await mockGoogleSheets.testConnection()
+        setSheetsConnected(result.success)
+        setSheetsConnectionMessage(result.message)
+        
+        if (result.success) {
+          setSheetsAlert({
+            type: 'success',
+            message: 'Google Sheets configured successfully in development mode!'
+          })
+          setSheetsEnabled(true)
+        }
       } else {
-        connectionResult = await googleSheetsService.testConnection()
-      }
-
-      if (!connectionResult.success) {
-        setSheetsAlert({
-          type: 'error',
-          message: connectionResult.message
-        })
+        // Real Google OAuth flow
+        initiateGoogleOAuth('sheets')
+        // The page will redirect, so we don't need to set state here
         return
       }
 
-      // Try to create a test sheet or get user sheets
-      let sheetsResult
-      if (isDevMode) {
-        sheetsResult = await mockGoogleSheets.createPOSheet('TradeFlow AI - PO Export')
-        if (sheetsResult) {
-          setSheetsAlert({
-            type: 'success',
-            message: `Successfully configured! Mock sheet created with ID: ${sheetsResult}`
-          })
-          setSheetsEnabled(true)
-        }
-      } else {
-        // In production, try to get user sheets to verify API access
-        const userSheets = await googleSheetsService.getUserSheets()
-        if (userSheets) {
-          setSheetsAlert({
-            type: 'success',
-            message: `Google Sheets connected successfully! Found ${userSheets.length} sheets in your account.`
-          })
-          setSheetsEnabled(true)
-        } else {
-          throw new Error('Failed to access Google Sheets API')
-        }
-      }
-
-      setSheetsConnected(true)
-      
     } catch (error) {
       console.error('Google Sheets configuration error:', error)
       setSheetsAlert({
@@ -421,7 +400,7 @@ function IntegrationsContent() {
                           ) : (
                             <>
                               <ExternalLink className="h-4 w-4 mr-2" />
-                              Configure Google Sheets
+                              {isDevMode ? 'Configure Google Sheets (Dev)' : 'Connect Google Sheets'}
                             </>
                           )}
                         </Button>
