@@ -1,19 +1,18 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key'
-const isDev = process.env.NEXT_PUBLIC_DEV_MODE === 'true'
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ldjwvzvvhiqfjfdmdqsp.supabase.co'
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxkanl3enZ2aGlxZmpmZG1kcXNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjgxNzQ0MzIsImV4cCI6MjA0Mzc1MDQzMn0.4E2K8M2oM-1CzTU_PNq2Y1T7cLZ2FqJ2z3wN2RzD4o'
 
 // Create Supabase client function for API routes
 export function createSupabaseClient() {
   return createClient(supabaseUrl, supabaseAnonKey)
 }
 
-// Create Supabase client - in dev mode, this may not connect to a real instance
+// Create Supabase client
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// Development mode check - more robust detection
-export const isDevMode = isDev || (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder'))
+// Production mode - no development mode fallbacks
+export const isDevMode = false
 
 // Log configuration for debugging
 if (typeof window !== 'undefined') {

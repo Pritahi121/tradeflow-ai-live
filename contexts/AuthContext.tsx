@@ -42,15 +42,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const getInitialSession = async () => {
-      if (isDevMode) {
-        // In development mode, use mock data
-        console.log('🚀 Running in development mode - using mock authentication')
-        setSession(mockSession)
-        setUser(mockUser)
-        setLoading(false)
-        return
-      }
-
       try {
         const { data: { session } } = await supabase.auth.getSession()
         setSession(session)
@@ -58,33 +49,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setLoading(false)
       } catch (error) {
         console.error('Auth session error:', error)
-        // Fallback to development mode if Supabase fails
-        console.log('⚠️ Supabase failed, falling back to development mode')
-        setSession(mockSession)
-        setUser(mockUser)
         setLoading(false)
       }
     }
 
     getInitialSession()
 
-    if (!isDevMode) {
-      // Listen for auth changes only in production mode
-      const { data: { subscription } } = supabase.auth.onAuthStateChange(
-        async (event, session) => {
-          setSession(session)
-          setUser(session?.user ?? null)
-          setLoading(false)
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session)
+        setUser(session?.user ?? null)
+        setLoading(false)
 
-          // Handle new user signup
-          if (event === 'SIGNED_UP' && session?.user) {
-            await handleNewUser(session.user)
-          }
+        // Handle new user signup
+        if (event === 'SIGNED_UP' && session?.user) {
+          await handleNewUser(session.user)
         }
-      )
+      }
+    )
 
-      return () => subscription.unsubscribe()
-    }
+    return () => subscription.unsubscribe()
   }, [])
 
   const handleNewUser = async (user: User) => {
@@ -124,15 +109,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   const signIn = async (email: string, password: string) => {
-    if (isDevMode) {
-      const result = await devAuth.signIn(email, password)
-      if (result.data.user) {
-        setUser(result.data.user)
-        setSession(result.data.session)
-      }
-      return result
-    }
-
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -141,15 +117,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   const signUp = async (email: string, password: string, metadata?: any) => {
-    if (isDevMode) {
-      const result = await devAuth.signUp(email, password, metadata)
-      if (result.data.user) {
-        setUser(result.data.user)
-        setSession(result.data.session)
-      }
-      return result
-    }
-
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -161,23 +128,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   const signInWithGoogle = async () => {
-    if (isDevMode) {
-      console.log('🔧 Development mode - using mock Google authentication')
-      const result = await devAuth.signInWithGoogle()
-      if (result.data.user) {
-        setUser(result.data.user)
-        setSession(result.data.session)
-      }
-      return result
-    }
-
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
           scopes: 'openid email profile https://www.googleapis.com/auth/spreadsheets',
-          // Additional options for better OAuth handling
           queryParams: {
             access_type: 'offline',
             prompt: 'consent'
@@ -210,16 +166,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   const signInWithTwitter = async () => {
-    if (isDevMode) {
-      console.log('🔧 Development mode - using mock Twitter authentication')
-      const result = await devAuth.signInWithTwitter()
-      if (result.data.user) {
-        setUser(result.data.user)
-        setSession(result.data.session)
-      }
-      return result
-    }
-
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'twitter',
       options: {
@@ -230,12 +176,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }
 
   const signOut = async () => {
-    if (isDevMode) {
-      setUser(null)
-      setSession(null)
-      return
-    }
-    
     await supabase.auth.signOut()
   }
 
