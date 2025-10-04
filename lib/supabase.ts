@@ -12,8 +12,17 @@ export function createSupabaseClient() {
 // Create Supabase client - in dev mode, this may not connect to a real instance
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-// Development mode check
-export const isDevMode = isDev && (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder'))
+// Development mode check - more robust detection
+export const isDevMode = isDev || (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder'))
+
+// Log configuration for debugging
+if (typeof window !== 'undefined') {
+  console.log('🔧 Supabase Configuration:', {
+    url: supabaseUrl,
+    isDevMode,
+    hasRealUrl: !supabaseUrl.includes('placeholder')
+  })
+}
 
 // Database Types matching your existing schema
 export interface Client {

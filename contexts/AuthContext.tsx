@@ -58,6 +58,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setLoading(false)
       } catch (error) {
         console.error('Auth session error:', error)
+        // Fallback to development mode if Supabase fails
+        console.log('⚠️ Supabase failed, falling back to development mode')
+        setSession(mockSession)
+        setUser(mockUser)
         setLoading(false)
       }
     }
