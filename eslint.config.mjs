@@ -10,6 +10,7 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+<<<<<<< HEAD
   ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
     rules: {
@@ -44,6 +45,19 @@ const eslintConfig = [
       "no-undef": "off",
       "no-unreachable": "off",
       "no-useless-escape": "off",
+=======
+  ...compat.extends("next/core-web-vitals"),
+  {
+    ignores: [
+      "node_modules/**",
+      ".next/**",
+      "out/**",
+      "build/**",
+      "next-env.d.ts",
+    ],
+    rules: {
+      "react/no-unescaped-entities": "off",
+>>>>>>> 332fc36a941c505e50583ca28baea7de11c244ae
     },
   },
 ];

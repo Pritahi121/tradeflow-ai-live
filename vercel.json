@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "installCommand": "npm install",
@@ -34,4 +35,16 @@
       ]
     }
   ]
+=======
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_SUPABASE_URL": "https://ldjwvzvvhiqfjfdmdqsp.supabase.co",
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxkanl3enZ2aGlxZmpmZG1kcXNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjgxNzQ0MzIsImV4cCI6MjA0Mzc1MDQzMn0.4E2K8M2oM-1CzTU_PNq2Y1T7cLZ2FqJ2z3wN2RzD4o"
+    }
+  },
+  "env": {
+    "NEXT_PUBLIC_SUPABASE_URL": "https://ldjwvzvvhiqfjfdmdqsp.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxkanl3enZ2aGlxZmpmZG1kcXNwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjgxNzQ0MzIsImV4cCI6MjA0Mzc1MDQzMn0.4E2K8M2oM-1CzTU_PNq2Y1T7cLZ2FqJ2z3wN2RzD4o"
+  }
+>>>>>>> 332fc36a941c505e50583ca28baea7de11c244ae
 }

@@ -6,7 +6,10 @@
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
+<<<<<<< HEAD
     "noImplicitAny": false,
+=======
+>>>>>>> 332fc36a941c505e50583ca28baea7de11c244ae
     "esModuleInterop": true,
     "module": "esnext",
     "moduleResolution": "bundler",
@@ -20,7 +23,11 @@
       }
     ],
     "paths": {
+<<<<<<< HEAD
       "@/*": ["./src/*"]
+=======
+      "@/*": ["./*"]
+>>>>>>> 332fc36a941c505e50583ca28baea7de11c244ae
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

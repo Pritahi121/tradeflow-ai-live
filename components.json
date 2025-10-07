@@ -5,11 +5,19 @@
   "tsx": true,
   "tailwind": {
     "config": "",
+<<<<<<< HEAD
     "css": "src/app/globals.css",
+=======
+    "css": "app/globals.css",
+>>>>>>> 332fc36a941c505e50583ca28baea7de11c244ae
     "baseColor": "neutral",
     "cssVariables": true,
     "prefix": ""
   },
+<<<<<<< HEAD
+=======
+  "iconLibrary": "lucide",
+>>>>>>> 332fc36a941c505e50583ca28baea7de11c244ae
   "aliases": {
     "components": "@/components",
     "utils": "@/lib/utils",
@@ -17,5 +25,10 @@
     "lib": "@/lib",
     "hooks": "@/hooks"
   },
+<<<<<<< HEAD
   "iconLibrary": "lucide"
 }
+=======
+  "registries": {}
+}
+>>>>>>> 332fc36a941c505e50583ca28baea7de11c244ae
